@@ -128,69 +128,21 @@ function changeAnimationSmoothly(newIndex) {
            
         });
         
-        BABYLON.SceneLoader.ImportMesh(null, "./asset/", "scene.glb", scene, function (meshes,) {
-            terrain = meshes[0];
-            terrain.position = new BABYLON.Vector3(0, 0,0);
-         
-            
-            
-            ;
-            terrain.castShadow = true;
-            if(terrain){
-                //var terrainPhysics = new BABYLON.PhysicsImpostor(meshes[0], BABYLON.PhysicsImpostor.MeshImpostor, { mass: 0, restitution: 0.5 }, scene);
-            }
-            
-
-           
-        });
-      
-                                // Objet pour stocker l'état des touches du clavier
-                                var keys = {};
-
-                                // Fonction appelée lorsqu'une touche est enfoncée
-                                document.addEventListener('keydown', function(event) {
-                                    // Enregistre l'état de la touche enfoncée dans l'objet keys
-                                    keys[event.key] = true;
-                                });
-                                
-                                // Fonction appelée lorsqu'une touche est relâchée
-                                document.addEventListener('keyup', function(event) {
-                                    // Met à jour l'état de la touche relâchée dans l'objet keys
-                                    keys[event.key] = false;
-                                });
-                                
-                                // Fonction pour vérifier si une touche est enfoncée
-                                function isKeyDown(key) {
-                                    return keys[key];
-                                }
-                                
-                                // Exemple d'utilisation
-                                setInterval(function() {
-                                    if (isKeyDown('z') || isKeyDown('q') || isKeyDown('s') || isKeyDown('d')   ) {
-                                        changeAnimationSmoothly(0);
-                                    } else if (isKeyDown('w') && ausol) {
-                                        // Jouer l'animation de préparation du saut
-                                        animations[1].play(false);
-                                    } else {
-                                        changeAnimationSmoothly(2);
-                                    }
-                                }, 10);
-                                
                           
                                 
 
                
-                var distance;
-                function calculateDistance(obj1, obj2) {
-                // Récupérer les positions des deux objets
-                var pos1 = obj1.position.y;
-                var pos2 = obj2.position.y;
+        var distance;
+        
+        function calculateDistance(obj1, obj2) {
                 
-                // Calculer la distance entre les deux objets
-                distance = pos1 + pos2;
+            var pos1 = obj1.position.y;
+            var pos2 = obj2.position.y;
 
-                return distance;
-            }
+            distance = pos1 + pos2;
+
+            return distance; 
+        }
 
             
 
@@ -204,36 +156,47 @@ function changeAnimationSmoothly(newIndex) {
                 }
             }
         });
-        var ausol;
+        
         const leftJoystick = new BABYLON.VirtualJoystick(true,joystickOptions);
         var joystickOptions = {
             position: { left: '50%', bottom: '50%' }, // Position centrée
-            color: 'red' // Couleur personnalisée
         };
 
-        var moveSpeed = 0.1;
-        var rotationSpeed = 0.1;; 
-        leftJoystick.setJoystickColor("red")
         
+        leftJoystick.setJoystickColor("black");
 
-        
+
+        var moveSpeed = 0.07;
+        function handleJoystickMovement(joystick, character, moveSpeed) {
+
+            if (joystick.pressed) {
+                changeAnimationSmoothly(0);
+                var horizontalInput = joystick.deltaPosition.y;
+                var verticalInput = joystick.deltaPosition.x;
+                
+                var movementDirection = new BABYLON.Vector3(horizontalInput, 0, verticalInput).normalize();
+            
+                character.position.x -= movementDirection.x * moveSpeed;
+                character.position.z += movementDirection.z * moveSpeed;
+                
+                var targetRotation = Math.atan2(-movementDirection.z, -movementDirection.x);
+                var rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(targetRotation, 0, 0);
+                character.rotationQuaternion = rotationQuaternion;
+            } else {
+
+                console.log("PAS USED");
+                changeAnimationSmoothly(2);
+            }
+        }
+
         engine.runRenderLoop(function () {
 
-           
-
-            scene.render();
             var horizontalInput = leftJoystick.deltaPosition.y;
             var verticalInput = leftJoystick.deltaPosition.x;
+            handleJoystickMovement(leftJoystick, empty, moveSpeed);
 
-            var movementDirection = new BABYLON.Vector3(horizontalInput, 0, verticalInput).normalize();
-
-            empty.position.x -= movementDirection.x * moveSpeed;
-            empty.position.z += movementDirection.z * moveSpeed;
-           
-            var targetRotation = Math.atan2(-movementDirection.z, -movementDirection.x);
-
-            var rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(targetRotation, 0, 0);
-            empty.rotationQuaternion = rotationQuaternion;
+            scene.render();
+        
 
 
 
