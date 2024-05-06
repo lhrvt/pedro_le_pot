@@ -1,13 +1,17 @@
+
+
 document.addEventListener("DOMContentLoaded", function () {
     var canvas = document.getElementById("renderCanvas");
     var engine = new BABYLON.Engine(canvas, true);
     var scene = new BABYLON.Scene(engine);
+    var myButton = document.getElementById("myButton");
     
-    const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(20, 20, 0), scene);
+    const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(20, 15, 0), scene);
     camera.setTarget(BABYLON.Vector3.Zero());
     camera.attachControl(canvas, true);
 
 
+    
     var hemiLight = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 1, 0), scene);
 
 // Définir les couleurs pour la partie supérieure et inférieure de la sphère
@@ -17,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         var sunLight = new BABYLON.DirectionalLight("sunLight", new BABYLON.Vector3(0, -1, 0), scene);
         sunLight.position = new BABYLON.Vector3(0, 10, 0); // Positionner la lumière
-        sunLight.intensity =7;
+        sunLight.intensity =5;
 
                 // Définir la couleur et l'intensité de la lumière
         sunLight.diffuse = new BABYLON.Color3(1, 1, 1); // Couleur blanche
@@ -33,7 +37,15 @@ document.addEventListener("DOMContentLoaded", function () {
    
 
     var invisibleMaterial = new BABYLON.StandardMaterial("invisibleMaterial", scene);
-    invisibleMaterial.alpha = 0.2; // Réglez l'opacité à zéro pour le rendre invisible
+    invisibleMaterial.alpha = 0; // Réglez l'opacité à zéro pour le rendre invisible
+
+    
+    var material_obs = new BABYLON.StandardMaterial("material", scene);
+    material_obs.diffuseColor = new BABYLON.Color3(0.1, 0.2, 0.4); // Rouge
+
+    var material_ground = new BABYLON.StandardMaterial("material", scene);
+    material_ground.diffuseColor = new BABYLON.Color3(0.7, 1, 0.9); // Rouge
+
 
     
 
@@ -50,23 +62,15 @@ document.addEventListener("DOMContentLoaded", function () {
     characterPhysics.rotationQuaternion = null;
     empty.position = new BABYLON.Vector3(0, 5,0);
     
+
+    
     empty.material = invisibleMaterial;
+    obstacle.material = material_obs;
+    ground.material = material_ground;
     characterPhysics.mass = 10;
 
-   
-
-
-    // Character
     
-    // Keyboard input
-    var inputMap = {};
-    scene.actionManager = new BABYLON.ActionManager(scene);
-    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function(evt) {		
-        inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-    }));
-    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function(evt) {		
-        inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-    }));
+
     
     // const xr =  scene.createDefaultXRExperienceAsync({
     //     // ask for an ar-session
@@ -75,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
     //     },
     //   });
 
-    var currentAnimationIndex = 0;
+var currentAnimationIndex = 0;
 
 function changeAnimationSmoothly(newIndex) {
     var currentAnimation = animations[currentAnimationIndex];
@@ -99,6 +103,7 @@ function changeAnimationSmoothly(newIndex) {
 
     // Met à jour l'index de l'animation actuelle
     currentAnimationIndex = newIndex;
+
 }
 
     var animations = {};
@@ -129,11 +134,9 @@ function changeAnimationSmoothly(newIndex) {
         });
         
                           
-                                
-
+                            
                
         var distance;
-        
         function calculateDistance(obj1, obj2) {
                 
             var pos1 = obj1.position.y;
@@ -165,6 +168,7 @@ function changeAnimationSmoothly(newIndex) {
         
         leftJoystick.setJoystickColor("black");
 
+        var ausol;
 
         var moveSpeed = 0.07;
         function handleJoystickMovement(joystick, character, moveSpeed) {
@@ -188,30 +192,33 @@ function changeAnimationSmoothly(newIndex) {
                 changeAnimationSmoothly(2);
             }
         }
+        myButton.addEventListener("click", function () {
 
+            if(ausol){
+                changeAnimationSmoothly(3);
+                console.log("Le bouton a été cliqué !");
+                characterPhysics.applyImpulse(
+                    new BABYLON.Vector3(0, 50, 0),
+                    empty.position   
+                );
+    
+
+                
+            }
+           
+        });
         engine.runRenderLoop(function () {
-
+            scene.render();
             var horizontalInput = leftJoystick.deltaPosition.y;
             var verticalInput = leftJoystick.deltaPosition.x;
             handleJoystickMovement(leftJoystick, empty, moveSpeed);
 
-            scene.render();
-        
+            
 
-
-
-            if (inputMap["w"] && ausol) {
-                characterPhysics.applyImpulse(
-                    new BABYLON.Vector3(0, 10, 0), // direction and magnitude of the applied impulse
-                    empty.position   
-                );
-                
-            }
 
 
             empty.rotationQuaternion.x = 0;
             empty.rotationQuaternion.z = 0;
-            //empty.rotationQuaternion.y = 0;
     
 
             
