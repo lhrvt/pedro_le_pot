@@ -4,7 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var canvas = document.getElementById("renderCanvas");
     var engine = new BABYLON.Engine(canvas, true);
     var scene = new BABYLON.Scene(engine);
-    var myButton = document.getElementById("myButton");
+    var btn_jump = document.getElementById("btn_jump");
+    var btn_punch = document.getElementById("btn_punch");
     
     const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(20, 15, 0), scene);
     camera.setTarget(BABYLON.Vector3.Zero());
@@ -21,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         var sunLight = new BABYLON.DirectionalLight("sunLight", new BABYLON.Vector3(0, -1, 0), scene);
         sunLight.position = new BABYLON.Vector3(0, 10, 0); // Positionner la lumière
-        sunLight.intensity =5;
+        sunLight.intensity =4;
 
                 // Définir la couleur et l'intensité de la lumière
         sunLight.diffuse = new BABYLON.Color3(1, 1, 1); // Couleur blanche
@@ -50,24 +51,61 @@ document.addEventListener("DOMContentLoaded", function () {
     
 
     scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
+
+
+    
     var ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 50, height: 50 }, scene);
+
+    var mur_droite = BABYLON.MeshBuilder.CreateGround("ground", { width: 50 , height: 50 }, scene);
+    var mur_gauche = BABYLON.MeshBuilder.CreateGround("ground", { width: 50 , height: 50 }, scene);
+    var mur_devant = BABYLON.MeshBuilder.CreateGround("ground", { width: 50 , height: 50 }, scene);
+    var mur_fond = BABYLON.MeshBuilder.CreateGround("ground", { width: 50 , height: 50 }, scene);
+
+    mur_droite.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
+    mur_droite.position = new BABYLON.Vector3(0, 0,-12);
+
+    mur_gauche.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
+    mur_gauche.position = new BABYLON.Vector3(0, 0, 11);
+
+    mur_devant.rotation = new BABYLON.Vector3(Math.PI / 2, 0,Math.PI / 2);
+    mur_devant.position = new BABYLON.Vector3(10, 0, 0);
+
+    mur_fond.rotation = new BABYLON.Vector3(Math.PI / 2, 0,Math.PI / 2);
+    mur_fond.position = new BABYLON.Vector3(-10, 0, 0);
+
+    
     ground.position = new BABYLON.Vector3(0, 0,0);
     var groundPhysics = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
+    var murPhysics = new BABYLON.PhysicsImpostor(mur_droite, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
+    var murPhysics = new BABYLON.PhysicsImpostor(mur_gauche, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
+    var murPhysics = new BABYLON.PhysicsImpostor(mur_devant, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
+    var murPhysics = new BABYLON.PhysicsImpostor(mur_fond, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
+
+
     var empty = BABYLON.MeshBuilder.CreateBox("empty", { size: 1.8 }, scene);
-    var obstacle = BABYLON.MeshBuilder.CreateBox("obstaclezs", { size: 4 }, scene);
+    var obstacle = BABYLON.MeshBuilder.CreateBox("obstaclezs", { size: 3.3 }, scene);
+    obstacle.rotation = new BABYLON.Vector3(Math.PI / 2, 62, 0);
+    obstacle.position = new BABYLON.Vector3(-5.5, 1, 8);
+
+
     var obstaclephysics = new BABYLON.PhysicsImpostor(obstacle, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
     
     var characterPhysics = new BABYLON.PhysicsImpostor(empty, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 0.2 }, scene);
     characterPhysics.freezeRotation = true;
     characterPhysics.rotationQuaternion = null;
-    empty.position = new BABYLON.Vector3(0, 5,0);
+    empty.position = new BABYLON.Vector3(0, 10,0);
     
 
     
     empty.material = invisibleMaterial;
-    obstacle.material = material_obs;
-    ground.material = material_ground;
-    characterPhysics.mass = 10;
+    obstacle.material = invisibleMaterial;
+    mur_devant.material = invisibleMaterial;
+    mur_droite.material = invisibleMaterial;
+    mur_gauche.material = invisibleMaterial;
+    mur_fond.material = invisibleMaterial;
+     
+    ground.material =invisibleMaterial;
+    characterPhysics.mass = 11;
 
     
 
@@ -107,6 +145,12 @@ function changeAnimationSmoothly(newIndex) {
 }
 
     var animations = {};
+
+    BABYLON.SceneLoader.ImportMesh(null, "./asset/", "terrain_.glb", scene, function (terrain_) {
+        
+        
+       
+    });
         BABYLON.SceneLoader.ImportMesh(null, "./asset/", "pedro.glb", scene, function (meshes, particleSystems, skeletons, animationGroups) {
             rocher = meshes[0];
             rocher.position = new BABYLON.Vector3(0, 0,0);
@@ -132,6 +176,7 @@ function changeAnimationSmoothly(newIndex) {
             }
            
         });
+
         
                           
                             
@@ -179,11 +224,12 @@ function changeAnimationSmoothly(newIndex) {
 
         var ausol;
         var jumping = false;
+        var punch = false;
 
         var moveSpeed = 0.07;
         function handleJoystickMovement(joystick, character, moveSpeed) {
 
-            if (joystick.pressed) {
+            if (joystick.pressed && !jumping) {
                 changeAnimationSmoothly(0);
                 var horizontalInput = joystick.deltaPosition.y;
                 var verticalInput = joystick.deltaPosition.x;
@@ -202,19 +248,18 @@ function changeAnimationSmoothly(newIndex) {
                 changeAnimationSmoothly(2);
             }
         }
-        myButton.addEventListener("click", function () {
+        btn_jump.addEventListener("click", function () {
 
             if (ausol) {
                 jumping = true;
-                animations[3].play(false); // Lancer l'animation
+                animations[3].play(false); // false empeche loop
             
-                // Attendre que l'animation soit terminée
+               
                 animations[3].onAnimationEndObservable.addOnce(() => {
-                    console.log("L'animation de saut est terminée !");
-                    
-                    // Une fois que l'animation est terminée, exécuter la fonction et lancer une autre animation
+                console.log("L'animation de saut est terminée !");
+
                     setTimeout(function() {
-                        changeAnimationSmoothly(1); // Changer l'animation
+                        animations[1].play(false);
                         characterPhysics.applyImpulse(new BABYLON.Vector3(0, 75, 0), empty.position); // Appliquer une impulsion
         
                     }, 0); // Délai avant de changer l'animation
@@ -223,10 +268,24 @@ function changeAnimationSmoothly(newIndex) {
                 // Réinitialiser jumping après un certain délai
                 setTimeout(function() {
                     jumping = false;
-                }, 500); // Délai en millisecondes
+                }, 1000); // Délai en millisecondes
             }
            
         });
+        btn_punch.addEventListener("click", function () {
+
+            
+                punch = true;
+                animations[4].play(false); // false empeche loop
+            
+            
+            setTimeout(function() {
+                punch = false;
+            }, 1000); // Délai en millisecondes
+           
+        });
+        
+        
         
         engine.runRenderLoop(function () {
             scene.render();
@@ -236,7 +295,7 @@ function changeAnimationSmoothly(newIndex) {
 
             empty.rotationQuaternion.x = 0;
             empty.rotationQuaternion.z = 0;
-    
+            camera.position.z = empty.position.z
             calculateDistance(empty, ground);
             if(distance < 1){
                 ausol = true 

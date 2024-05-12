@@ -23,13 +23,26 @@
             height: 100vh;
             touch-action: none;
         }
-        #myButton {
+        #btn_jump {
             position: absolute;
             bottom: 10%; /* ajustez la position verticale */
             left: 20%; /* ajustez la position horizontale */
             padding: 10px 20px;
             font-size: 16px;
             background-color: #6c2ebe;
+            color: white;
+            border: 2em;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 100;
+        }
+        #btn_punch {
+            position: absolute;
+            bottom: 15%; /* ajustez la position verticale */
+            left: 20%; /* ajustez la position horizontale */
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #be2e2e;
             color: white;
             border: 2em;
             border-radius: 5px;
@@ -43,6 +56,7 @@
 <body>
     <canvas id="renderCanvas"></canvas>
     <script src="script.js"></script>
-    <button id="myButton">JUMP</button>
+    <button id="btn_jump">JUMP</button>
+    <button id="btn_punch">PUNCH</button>
 </body>
 </html>
