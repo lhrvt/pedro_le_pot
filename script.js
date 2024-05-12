@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     
 
-    scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
+    scene.enablePhysics(new BABYLON.Vector3(0, -15, 0), new BABYLON.CannonJSPlugin());
 
 
     
@@ -62,16 +62,16 @@ document.addEventListener("DOMContentLoaded", function () {
     var mur_fond = BABYLON.MeshBuilder.CreateGround("ground", { width: 50 , height: 50 }, scene);
 
     mur_droite.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
-    mur_droite.position = new BABYLON.Vector3(0, 0,-12);
+    mur_droite.position = new BABYLON.Vector3(0, 0,-13);
 
     mur_gauche.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
-    mur_gauche.position = new BABYLON.Vector3(0, 0, 11);
+    mur_gauche.position = new BABYLON.Vector3(0, 0, 13);
 
     mur_devant.rotation = new BABYLON.Vector3(Math.PI / 2, 0,Math.PI / 2);
     mur_devant.position = new BABYLON.Vector3(10, 0, 0);
 
     mur_fond.rotation = new BABYLON.Vector3(Math.PI / 2, 0,Math.PI / 2);
-    mur_fond.position = new BABYLON.Vector3(-10, 0, 0);
+    mur_fond.position = new BABYLON.Vector3(-12, 0, 0);
 
     
     ground.position = new BABYLON.Vector3(0, 0,0);
@@ -83,12 +83,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     var empty = BABYLON.MeshBuilder.CreateBox("empty", { size: 1.8 }, scene);
-    var obstacle = BABYLON.MeshBuilder.CreateBox("obstaclezs", { size: 3.3 }, scene);
-    obstacle.rotation = new BABYLON.Vector3(Math.PI / 2, 62, 0);
-    obstacle.position = new BABYLON.Vector3(-5.5, 1, 8);
+ 
+
+    var obstacle_1 = BABYLON.MeshBuilder.CreateBox("obstaclezs", { size: 3.3 }, scene);
+    var obstacle_2 = BABYLON.MeshBuilder.CreateBox("obstaclezs", { size: 3 }, scene);
+    var obstacle_3 = BABYLON.MeshBuilder.CreateBox("obstaclezs", { size: 3.4 }, scene);
 
 
-    var obstaclephysics = new BABYLON.PhysicsImpostor(obstacle, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
+    obstacle_1.rotation = new BABYLON.Vector3(Math.PI / 2, 62, 0);
+    obstacle_1.position = new BABYLON.Vector3(-5.5, 1, 8);
+
+    obstacle_2.rotation = new BABYLON.Vector3(Math.PI / 2, -205, 0);
+    obstacle_2.position = new BABYLON.Vector3(8.5, 1, -4.8);
+
+    obstacle_3.rotation = new BABYLON.Vector3(0, 0, 0);
+    obstacle_3.position = new BABYLON.Vector3(-12,0.7, -12);
+
+
+    var obstaclephysics = new BABYLON.PhysicsImpostor(obstacle_1, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
+    var obstaclephysics = new BABYLON.PhysicsImpostor(obstacle_3, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
+    var obstaclephysics = new BABYLON.PhysicsImpostor(obstacle_2, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
     
     var characterPhysics = new BABYLON.PhysicsImpostor(empty, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 0.2 }, scene);
     characterPhysics.freezeRotation = true;
@@ -98,14 +112,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     
     empty.material = invisibleMaterial;
-    obstacle.material = invisibleMaterial;
+
+    obstacle_1.material = invisibleMaterial;
+    obstacle_2.material = invisibleMaterial;
+    obstacle_3.material = invisibleMaterial;
+
     mur_devant.material = invisibleMaterial;
     mur_droite.material = invisibleMaterial;
     mur_gauche.material = invisibleMaterial;
     mur_fond.material = invisibleMaterial;
      
     ground.material =invisibleMaterial;
-    characterPhysics.mass = 11;
+    characterPhysics.mass = 8;
 
     
 
