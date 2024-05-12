@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
     ground.position = new BABYLON.Vector3(0, 0,0);
     var groundPhysics = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
     var empty = BABYLON.MeshBuilder.CreateBox("empty", { size: 1.8 }, scene);
-    var obstacle = BABYLON.MeshBuilder.CreateBox("obstaclezs", { size: 1.8 }, scene);
+    var obstacle = BABYLON.MeshBuilder.CreateBox("obstaclezs", { size: 4 }, scene);
     var obstaclephysics = new BABYLON.PhysicsImpostor(obstacle, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.5 }, scene);
     
     var characterPhysics = new BABYLON.PhysicsImpostor(empty, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 0.2 }, scene);
@@ -160,15 +160,25 @@ function changeAnimationSmoothly(newIndex) {
             }
         });
         
-        const leftJoystick = new BABYLON.VirtualJoystick(true,joystickOptions);
-        var joystickOptions = {
-            position: { left: '50%', bottom: '50%' }, // Position centrée
-        };
+        const leftJoystick = new BABYLON.VirtualJoystick();
+        var screenWidth = window.innerWidth;
+        var screenHeight = window.innerHeight;
 
         
-        leftJoystick.setJoystickColor("black");
+        
+        leftJoystick.setPosition(screenWidth -100, screenHeight - 200);
+        leftJoystick.setScale
+        leftJoystick.alwaysVisible = true;
+        leftJoystick.containerSize = 50;
+        leftJoystick.puckSize = 25;
+        
+
+        
+        leftJoystick.setJoystickColor("purple");
+        
 
         var ausol;
+        var jumping = false;
 
         var moveSpeed = 0.07;
         function handleJoystickMovement(joystick, character, moveSpeed) {
@@ -186,42 +196,47 @@ function changeAnimationSmoothly(newIndex) {
                 var targetRotation = Math.atan2(-movementDirection.z, -movementDirection.x);
                 var rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(targetRotation, 0, 0);
                 character.rotationQuaternion = rotationQuaternion;
-            } else {
+            } else if(!jumping){
 
-                console.log("PAS USED");
+                //console.log("PAS USED");
                 changeAnimationSmoothly(2);
             }
         }
         myButton.addEventListener("click", function () {
 
-            if(ausol){
-                changeAnimationSmoothly(3);
-                console.log("Le bouton a été cliqué !");
-                characterPhysics.applyImpulse(
-                    new BABYLON.Vector3(0, 50, 0),
-                    empty.position   
-                );
-    
-
-                
+            if (ausol) {
+                jumping = true;
+                animations[3].play(false); // Lancer l'animation
+            
+                // Attendre que l'animation soit terminée
+                animations[3].onAnimationEndObservable.addOnce(() => {
+                    console.log("L'animation de saut est terminée !");
+                    
+                    // Une fois que l'animation est terminée, exécuter la fonction et lancer une autre animation
+                    setTimeout(function() {
+                        changeAnimationSmoothly(1); // Changer l'animation
+                        characterPhysics.applyImpulse(new BABYLON.Vector3(0, 75, 0), empty.position); // Appliquer une impulsion
+        
+                    }, 0); // Délai avant de changer l'animation
+                });
+            
+                // Réinitialiser jumping après un certain délai
+                setTimeout(function() {
+                    jumping = false;
+                }, 500); // Délai en millisecondes
             }
            
         });
+        
         engine.runRenderLoop(function () {
             scene.render();
-            var horizontalInput = leftJoystick.deltaPosition.y;
-            var verticalInput = leftJoystick.deltaPosition.x;
+
+            console.log("jumng" + jumping);
             handleJoystickMovement(leftJoystick, empty, moveSpeed);
-
-            
-
-
 
             empty.rotationQuaternion.x = 0;
             empty.rotationQuaternion.z = 0;
     
-
-            
             calculateDistance(empty, ground);
             if(distance < 1){
                 ausol = true 
